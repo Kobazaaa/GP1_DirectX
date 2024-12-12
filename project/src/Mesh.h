@@ -8,16 +8,18 @@
 
 using namespace dae;
 
-struct Vertex_PosCol
+struct Vertex
 {
 	Vector3 position	{};
 	ColorRGB color		{ colors::White };
+	Vector2 uv			{};
 };
 
 class Mesh final
 {
 public:
-	Mesh(ID3D11Device* pDevice, const std::vector<Vertex_PosCol>& vertices, const std::vector<uint32_t>& indices);
+	Mesh(ID3D11Device* pDevice, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices,
+		const std::wstring& fxFile, const std::string& textureFile);
 	~Mesh();
 	
 	Mesh(const Mesh&) = delete;
@@ -26,7 +28,10 @@ public:
 	Mesh& operator=(Mesh&&) noexcept = delete;
 
 	void Render(ID3D11DeviceContext* pDeviceContext);
+	void UpdateWorldMatrix(const Matrix& newWorldMatrix);
+	void UpdateWorldViewProjectionMatrix(const Matrix& worldViewProj);
 
+	void ToggleTechniqueIndex();
 private:
 	Effect* m_pEffect{};
 
@@ -35,4 +40,9 @@ private:
 	ID3D11Buffer* m_pIndexBuffer{};
 
 	uint32_t m_NumIndices{};
+
+	Matrix worldMatrix{ };
+	ID3DX11EffectMatrixVariable* m_pMatWorldViewProjVariable{};
+
+	uint32_t m_TechniqueIndex{ 0 };
 };

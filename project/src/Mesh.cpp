@@ -1,24 +1,33 @@
 #include "Mesh.h"
 #include <cassert>
 
-Mesh::Mesh(ID3D11Device* pDevice, const std::vector<Vertex_PosCol>& vertices, const std::vector<uint32_t>& indices)
+Mesh::Mesh(ID3D11Device* pDevice, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices,
+	const std::wstring& fxFile, const std::string& textureFile)
 {
-	m_pEffect = new Effect(pDevice, L"resources/PosCol3D.fx");
+	m_pEffect = new Effect(pDevice, fxFile);
 	auto pTechnique = m_pEffect->GetTechnique();
-	
+	Texture* texture= Texture::LoadFromFile(textureFile, pDevice);
+	m_pEffect->SetDiffuseMap(texture);
+	delete texture;
+
 	// Create Vertex Layout
-	static constexpr uint32_t numElements{ 2 };
+	static constexpr uint32_t numElements{ 3 };
 	D3D11_INPUT_ELEMENT_DESC vertexDesc[numElements]{};
 
 	vertexDesc[0].SemanticName = "POSITION";
 	vertexDesc[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
-	vertexDesc[0].AlignedByteOffset = 0;
+	vertexDesc[0].AlignedByteOffset = offsetof(Vertex, position);
 	vertexDesc[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 
 	vertexDesc[1].SemanticName = "COLOR";
 	vertexDesc[1].Format = DXGI_FORMAT_R32G32B32_FLOAT;
-	vertexDesc[1].AlignedByteOffset = 12;
+	vertexDesc[1].AlignedByteOffset = offsetof(Vertex, color);
 	vertexDesc[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+
+	vertexDesc[2].SemanticName = "TEXCOORD";
+	vertexDesc[2].Format = DXGI_FORMAT_R32G32_FLOAT;
+	vertexDesc[2].AlignedByteOffset = offsetof(Vertex, uv);
+	vertexDesc[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 
 	// Create Input Layout
 	D3DX11_PASS_DESC passDesc{};
@@ -37,7 +46,7 @@ Mesh::Mesh(ID3D11Device* pDevice, const std::vector<Vertex_PosCol>& vertices, co
 	// Create Vertex Buffer
 	D3D11_BUFFER_DESC bd{};
 	bd.Usage = D3D11_USAGE_IMMUTABLE;
-	bd.ByteWidth = sizeof(Vertex_PosCol) * static_cast<uint32_t>(vertices.size());
+	bd.ByteWidth = sizeof(Vertex) * static_cast<uint32_t>(vertices.size());
 	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bd.CPUAccessFlags = 0;
 	bd.MiscFlags = 0;
@@ -60,10 +69,18 @@ Mesh::Mesh(ID3D11Device* pDevice, const std::vector<Vertex_PosCol>& vertices, co
 	result = pDevice->CreateBuffer(&bd, &initData, &m_pIndexBuffer);
 	if (FAILED(result))
 		return;
+
+	// Camera
+	m_pMatWorldViewProjVariable = m_pEffect->GetEffect()->GetVariableByName("gWorldViewProj")->AsMatrix();
+	if (!m_pMatWorldViewProjVariable->IsValid())
+	{
+		std::wcout << L"m_pMatWorldViewProjVariable not valid!\n";
+	}
 }
 
 Mesh::~Mesh()
 {
+	m_pMatWorldViewProjVariable->Release();
 	m_pIndexBuffer->Release();
 	m_pVertexBuffer->Release();
 	m_pInputLayout->Release();
@@ -79,7 +96,7 @@ void Mesh::Render(ID3D11DeviceContext* pDeviceContext)
 	pDeviceContext->IASetInputLayout(m_pInputLayout);
 
 	//3. Set Vertex Buffer
-	constexpr UINT stride = sizeof(Vertex_PosCol);
+	constexpr UINT stride = sizeof(Vertex);
 	constexpr UINT offset = 0;
 	pDeviceContext->IASetVertexBuffers(0, 1, &m_pVertexBuffer, &stride, &offset);
 
@@ -89,10 +106,27 @@ void Mesh::Render(ID3D11DeviceContext* pDeviceContext)
 	//5. Draw
 	D3DX11_TECHNIQUE_DESC techDesc{};
 	m_pEffect->GetTechnique()->GetDesc(&techDesc);
-	for (UINT p = 0; p < techDesc.Passes; ++p)
-	{
-		m_pEffect->GetTechnique()->GetPassByIndex(p)->Apply(0, pDeviceContext);
-		pDeviceContext->DrawIndexed(m_NumIndices, 0, 0);
-	}
+	m_pEffect->GetTechnique()->GetPassByIndex(m_TechniqueIndex)->Apply(0, pDeviceContext);
+	pDeviceContext->DrawIndexed(m_NumIndices, 0, 0);
 
+}
+
+void Mesh::UpdateWorldMatrix(const Matrix& newWorldMatrix)
+{
+	worldMatrix = newWorldMatrix;
+}
+
+void Mesh::UpdateWorldViewProjectionMatrix(const Matrix& viewProjectionMatrix)
+{
+	Matrix m = worldMatrix * viewProjectionMatrix;
+	m_pMatWorldViewProjVariable->SetMatrix(reinterpret_cast<const float*>(&m));
+}
+
+void Mesh::ToggleTechniqueIndex()
+{
+	D3DX11_TECHNIQUE_DESC techDesc{};
+	m_pEffect->GetTechnique()->GetDesc(&techDesc);
+	uint32_t passes = techDesc.Passes;
+	++m_TechniqueIndex;
+	m_TechniqueIndex %= passes;
 }

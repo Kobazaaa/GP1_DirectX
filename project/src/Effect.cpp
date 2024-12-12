@@ -8,12 +8,17 @@ Effect::Effect(ID3D11Device* pDevice, const std::wstring& assetFile)
 		m_pTechnique = m_pEffect->GetTechniqueByName("DefaultTechnique");
 		if (!m_pTechnique->IsValid())
 			std::wcout << L"Technique not valid\n";
+
+		m_pDiffuseMapVariable = m_pEffect->GetVariableByName("gDiffuseMap")->AsShaderResource();
+		if (!m_pDiffuseMapVariable->IsValid())
+			std::wcout << L"m_pDiffuseMapVariable not valid!\n";
 	}
 }
 Effect::~Effect()
 {
-	if(m_pTechnique)	m_pTechnique->Release();
-	if(m_pEffect)		m_pEffect->Release();
+	if(m_pDiffuseMapVariable)	m_pDiffuseMapVariable->Release();
+	if(m_pTechnique)			m_pTechnique->Release();
+	if(m_pEffect)				m_pEffect->Release();
 }
 
 ID3DX11Effect* Effect::LoadEffect(ID3D11Device* pDevice, const std::wstring& assetFile)
@@ -65,11 +70,16 @@ ID3DX11Effect* Effect::LoadEffect(ID3D11Device* pDevice, const std::wstring& ass
 
 	return pEffect;
 }
-ID3DX11Effect* Effect::GetEffect()
+void Effect::SetDiffuseMap(Texture* pDiffuseTexture)
+{
+	if (m_pDiffuseMapVariable)
+		m_pDiffuseMapVariable->SetResource(pDiffuseTexture->GetSRV());
+}
+ID3DX11Effect* Effect::GetEffect() const
 {
 	return m_pEffect;
 }
-ID3DX11EffectTechnique* Effect::GetTechnique()
+ID3DX11EffectTechnique* Effect::GetTechnique() const
 {
 	return m_pTechnique;
 }

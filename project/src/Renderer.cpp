@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Renderer.h"
+#include "Utils.h"
 
 namespace dae {
 
@@ -22,15 +23,25 @@ namespace dae {
 		}
 
 		// Create some data for our mesh
-		std::vector<Vertex_PosCol> vertices
+		//std::vector<Vertex> vertices
+		//{
+		//	{ {  0.f ,  0.5f, 0.5f } , { 1.f, 0.f, 0.f } },
+		//	{ {  0.5f, -0.5f, 0.5f } , { 0.f, 1.f, 0.f } },
+		//	{ { -0.5f, -0.5f, 0.5f } , { 0.f, 0.f, 1.f } }
+		//};
+		//std::vector<uint32_t> indices{ 0, 1, 2 };
+		std::vector<Vertex> vertices
 		{
-			{ {  0.f ,  0.5f, 0.5f } , { 1.f, 0.f, 0.f } },
-			{ {  0.5f, -0.5f, 0.5f } , { 0.f, 1.f, 0.f } },
-			{ { -0.5f, -0.5f, 0.5f } , { 0.f, 0.f, 1.f } }
+				{ { -1.f,  1.f, 0.f }, { 1.f, 0.f, 0.f }, { 0.f, 0.f } },
+				{ {  1.f,  1.f, 0.f }, { 0.f, 1.f, 0.f }, { 1.f, 0.f } },
+				{ {  1.f, -1.f, 0.f }, { 0.f, 0.f, 1.f }, { 1.f, 1.f } },
+				{ { -1.f, -1.f, 0.f }, { 1.f, 1.f, 1.f }, { 0.f, 1.f } }
 		};
-		std::vector<uint32_t> indices{ 0, 1, 2 };
+		std::vector<uint32_t> indices{ 0, 1, 2, 0, 2, 3};
 
-		m_pMesh = new Mesh(m_pDevice, vertices, indices);
+		Utils::ParseOBJ("resources/vehicle.obj", vertices, indices);
+		m_pMesh = new Mesh(m_pDevice, vertices, indices, L"resources/PosCol3D.fx", "resources/vehicle_diffuse.png");
+		m_Camera.Initialize(45.f, { 0.f, 0.f , -10.f }, m_Width / float(m_Height));
 	}
 
 	Renderer::~Renderer()
@@ -53,7 +64,11 @@ namespace dae {
 
 	void Renderer::Update(const Timer* pTimer)
 	{
+		m_Camera.Update(pTimer);
+		m_pMesh->UpdateWorldViewProjectionMatrix(m_Camera.GetViewMatrix() * m_Camera.GetProjectionMatrix());
+		Matrix m = m_Camera.GetViewMatrix() * m_Camera.GetProjectionMatrix();
 
+		m_pMesh->UpdateWorldMatrix(Matrix::CreateRotationY(pTimer->GetTotal() * PI_DIV_2));
 	}
 
 
@@ -72,6 +87,11 @@ namespace dae {
 
 		// 3. PRESENT BACKBUFFER (SWAP)
 		m_pSwapChain->Present(0, 0);
+	}
+
+	void Renderer::ToggleTechniqueIndex()
+	{
+		m_pMesh->ToggleTechniqueIndex();
 	}
 
 	HRESULT Renderer::InitializeDirectX()

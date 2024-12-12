@@ -1,5 +1,6 @@
 #pragma once
 #include "Mesh.h"
+#include "Camera.h"
 
 struct SDL_Window;
 struct SDL_Surface;
@@ -19,6 +20,8 @@ namespace dae
 
 		void Update(const Timer* pTimer);
 		void Render() const;
+
+		void ToggleTechniqueIndex();
 
 	private:
 		SDL_Window* m_pWindow{};
@@ -40,5 +43,6 @@ namespace dae
 		ID3D11RenderTargetView* m_pRenderTargetView		{ nullptr };
 
 		Mesh* m_pMesh{ nullptr };
+		Camera m_Camera{};
 	};
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include "pch.h"
+#include "Texture.h"
 
 class Effect final
 {
@@ -13,10 +14,12 @@ public:
 	Effect& operator=(Effect&& rhs) noexcept = delete;
 
 	static ID3DX11Effect* LoadEffect(ID3D11Device* pDevice, const std::wstring& assetFile);
-	ID3DX11Effect* GetEffect();
-	ID3DX11EffectTechnique* GetTechnique();
+	void SetDiffuseMap(Texture* pDiffuseTexture);
+	ID3DX11Effect* GetEffect() const;
+	ID3DX11EffectTechnique* GetTechnique() const;
 
 private:
 	ID3DX11Effect* m_pEffect{};
 	ID3DX11EffectTechnique* m_pTechnique{};
+	ID3DX11EffectShaderResourceVariable* m_pDiffuseMapVariable{};
 };

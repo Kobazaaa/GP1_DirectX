@@ -22,3 +22,5 @@
 // Framework Headers
 #include "Timer.h"
 #include "Math.h"
+
+using namespace dae;
