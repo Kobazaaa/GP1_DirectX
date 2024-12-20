@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------------------------
 // File: D3DX11Effect.h
 //
-// Direct3D 11 Effect Types & APIs Header
+// Direct3D 11 FullShadeEffect Types & APIs Header
 //
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
@@ -30,7 +30,7 @@
 // File contents:
 //
 // 1) Stateblock enums, structs, interfaces, flat APIs
-// 2) Effect enums, structs, interfaces, flat APIs
+// 2) FullShadeEffect enums, structs, interfaces, flat APIs
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef D3DX11_BYTES_FROM_BITS
@@ -1060,16 +1060,16 @@ extern "C" {
 //  DataLength
 //      Length of the data blob
 //  FXFlags
-//      Flags pertaining to Effect creation
+//      Flags pertaining to FullShadeEffect creation
 //  pDevice
-//      Pointer to the D3D11 device on which to create Effect resources
+//      Pointer to the D3D11 device on which to create FullShadeEffect resources
 //  srcName [optional]
 //      ASCII string to use for debug object naming
 //
 // [out]
 //
 //  ppEffect
-//      Address of the newly created Effect interface
+//      Address of the newly created FullShadeEffect interface
 //
 //----------------------------------------------------------------------------
 
@@ -1092,14 +1092,14 @@ HRESULT WINAPI D3DX11CreateEffectFromMemory( _In_reads_bytes_(DataLength) LPCVOI
 //  pFileName
 //      Compiled effect file
 //  FXFlags
-//      Flags pertaining to Effect creation
+//      Flags pertaining to FullShadeEffect creation
 //  pDevice
-//      Pointer to the D3D11 device on which to create Effect resources
+//      Pointer to the D3D11 device on which to create FullShadeEffect resources
 //
 // [out]
 //
 //  ppEffect
-//      Address of the newly created Effect interface
+//      Address of the newly created FullShadeEffect interface
 //
 //----------------------------------------------------------------------------
 
@@ -1130,14 +1130,14 @@ HRESULT WINAPI D3DX11CreateEffectFromFile( _In_z_ LPCWSTR pFileName,
 //  HLSLFlags
 //     HLSL compile options (see D3DCOMPILE flags)
 //  FXFlags
-//      Flags pertaining to Effect compilation (see D3DCOMPILE_EFFECT flags)
+//      Flags pertaining to FullShadeEffect compilation (see D3DCOMPILE_EFFECT flags)
 //  pDevice
-//      Pointer to the D3D11 device on which to create Effect resources
+//      Pointer to the D3D11 device on which to create FullShadeEffect resources
 //
 // [out]
 //
 //  ppEffect
-//      Address of the newly created Effect interface
+//      Address of the newly created FullShadeEffect interface
 //
 //----------------------------------------------------------------------------
 
@@ -1170,14 +1170,14 @@ HRESULT D3DX11CompileEffectFromMemory( _In_reads_bytes_(DataLength) LPCVOID pDat
 //  HLSLFlags
 //     HLSL compile options (see D3DCOMPILE flags)
 //  FXFlags
-//      Flags pertaining to Effect compilation (see D3DCOMPILE_EFFECT flags)
+//      Flags pertaining to FullShadeEffect compilation (see D3DCOMPILE_EFFECT flags)
 //  pDevice
-//      Pointer to the D3D11 device on which to create Effect resources
+//      Pointer to the D3D11 device on which to create FullShadeEffect resources
 //
 // [out]
 //
 //  ppEffect
-//      Address of the newly created Effect interface
+//      Address of the newly created FullShadeEffect interface
 //
 //----------------------------------------------------------------------------
 

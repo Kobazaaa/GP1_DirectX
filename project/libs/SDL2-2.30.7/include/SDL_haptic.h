@@ -224,7 +224,7 @@ typedef struct _SDL_Haptic SDL_Haptic;
 /**
  *  \brief Spring effect supported - uses axes position.
  *
- *  Condition haptic effect that simulates a spring.  Effect is based on the
+ *  Condition haptic effect that simulates a spring.  FullShadeEffect is based on the
  *  axes position.
  *
  *  \sa SDL_HapticCondition
@@ -234,7 +234,7 @@ typedef struct _SDL_Haptic SDL_Haptic;
 /**
  *  \brief Damper effect supported - uses axes velocity.
  *
- *  Condition haptic effect that simulates dampening.  Effect is based on the
+ *  Condition haptic effect that simulates dampening.  FullShadeEffect is based on the
  *  axes velocity.
  *
  *  \sa SDL_HapticCondition
@@ -244,7 +244,7 @@ typedef struct _SDL_Haptic SDL_Haptic;
 /**
  *  \brief Inertia effect supported - uses axes acceleration.
  *
- *  Condition haptic effect that simulates inertia.  Effect is based on the axes
+ *  Condition haptic effect that simulates inertia.  FullShadeEffect is based on the axes
  *  acceleration.
  *
  *  \sa SDL_HapticCondition
@@ -254,7 +254,7 @@ typedef struct _SDL_Haptic SDL_Haptic;
 /**
  *  \brief Friction effect supported - uses axes movement.
  *
- *  Condition haptic effect that simulates friction.  Effect is based on the
+ *  Condition haptic effect that simulates friction.  FullShadeEffect is based on the
  *  axes movement.
  *
  *  \sa SDL_HapticCondition
@@ -809,7 +809,7 @@ typedef struct SDL_HapticCustom
 typedef union SDL_HapticEffect
 {
     /* Common for all force feedback effects */
-    Uint16 type;                    /**< Effect type. */
+    Uint16 type;                    /**< FullShadeEffect type. */
     SDL_HapticConstant constant;    /**< Constant effect. */
     SDL_HapticPeriodic periodic;    /**< Periodic effect. */
     SDL_HapticCondition condition;  /**< Condition effect. */

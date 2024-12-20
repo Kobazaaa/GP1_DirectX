@@ -1,5 +1,4 @@
 #include "Texture.h"
-#include "Vector2.h"
 #include <iostream>
 #include <SDL_image.h>
 
@@ -33,11 +32,11 @@ namespace dae
 			return;
 		}
 
-		D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc{};
-		SRVDesc.Format = format;
-		SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-		SRVDesc.Texture2D.MipLevels = 1;
-		hr = pDevice->CreateShaderResourceView(m_pResource, &SRVDesc, &m_pSRV);
+		D3D11_SHADER_RESOURCE_VIEW_DESC descSRV{};
+		descSRV.Format = format;
+		descSRV.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+		descSRV.Texture2D.MipLevels = 1;
+		hr = pDevice->CreateShaderResourceView(m_pResource, &descSRV, &m_pSRV);
 		if (FAILED(hr))
 		{
 			std::wcout << L"Could not create SRV!";
@@ -59,7 +58,7 @@ namespace dae
 		SDL_Surface* pSurface = IMG_Load(path.c_str());
 		if (pSurface == nullptr)
 		{
-			std::cerr << "Texture::LoadFromFile > Failed to load texture: " << path << " Error: " << IMG_GetError() << std::endl;
+			std::cerr << "Texture::LoadFromFile > Failed to load texture: " << path << " Error: " << IMG_GetError() << "\n";
 			throw std::runtime_error("Failed to load texture");
 		}
 

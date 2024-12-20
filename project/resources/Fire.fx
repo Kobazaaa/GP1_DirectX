@@ -3,17 +3,8 @@
 //--------------------------------------------------
 float4x4 gWorldMatrix : WorldMatrix;
 float4x4 gWorldViewProj : WorldViewProjection;
-float3 gCameraPos : CAMERA;
 
 Texture2D gDiffuseMap : DiffuseMap;
-Texture2D gNormalMap : NormalMap;
-Texture2D gSpecularMap : SpecularMap;
-Texture2D gGlossinessMap : GlossinessMap;
-
-float gPI = 3.14159265358979323846f;
-float gLIGHT_INTENSITY = 7.f;
-float gSHININESS = 25.f;
-float3 gLIGHT_DIR = { 0.577f, -0.577f, 0.577f };
 
 //--------------------------------------------------
 //   Sampler States
@@ -42,7 +33,7 @@ SamplerState samAnisotropic
 //--------------------------------------------------
 RasterizerState gRasterizerState
 {
-    CullMode = back;
+    CullMode = none;
     FrontCounterClockwise = false;
 };
 
@@ -51,7 +42,14 @@ RasterizerState gRasterizerState
 //--------------------------------------------------
 BlendState gBlendState
 {
-
+    BlendEnable[0] = true;
+    SrcBlend = src_alpha;
+    DestBlend = inv_src_alpha;
+    BlendOp = add;
+    SrcBlendAlpha = zero;
+    DestBlendAlpha = zero;
+    BlendOpAlpha = add;
+    RenderTargetWriteMask[0] = 0x0f;
 };
 
 //--------------------------------------------------
@@ -59,7 +57,10 @@ BlendState gBlendState
 //--------------------------------------------------
 DepthStencilState gDepthStencilState
 {
-
+    DepthEnable = true;
+    DepthWriteMask = zero;
+    DepthFunc = less;
+    StencilEnable = false;
 };
 
 //--------------------------------------------------
@@ -84,29 +85,6 @@ struct VS_OUTPUT
 };
 
 //--------------------------------------------------
-//   Helpful Functions
-//--------------------------------------------------
-float4 ShadePixel(VS_OUTPUT input, SamplerState samplerState)
-{
-    // OA
-    float observedArea = dot(input.normal, -gLIGHT_DIR);
-    
-    // Lambert Diffuse Color
-    float4 diffuse = gDiffuseMap.Sample(samplerState, input.UV) * gLIGHT_INTENSITY / gPI;
-    
-    // Specular Phong
-    float3 viewDir = normalize(gCameraPos - input.WorldPosition.xyz);
-    
-    float ks = gSpecularMap.Sample(samplerState, input.UV).r;
-    float exp = gGlossinessMap.Sample(samplerState, input.UV).r * gSHININESS;
-    float3 ref = reflect(gLIGHT_DIR, input.normal);
-    float cosAlpha = max(dot(ref, viewDir), 0);
-    float4 specular = float4(1, 1, 1, 1) * ks * pow(cosAlpha, exp);
-    
-    return (diffuse + specular) * observedArea;
-}
-
-//--------------------------------------------------
 //   Vertex Shader
 //--------------------------------------------------
 VS_OUTPUT VS(VS_INPUT input)
@@ -126,15 +104,15 @@ VS_OUTPUT VS(VS_INPUT input)
 //--------------------------------------------------
 float4 PSP(VS_OUTPUT input) : SV_TARGET
 {
-    return ShadePixel(input, samPoint);
+    return gDiffuseMap.Sample(samPoint, input.UV);
 }
 float4 PSL(VS_OUTPUT input) : SV_TARGET
 {
-    return ShadePixel(input, samLinear);
+    return gDiffuseMap.Sample(samLinear, input.UV);
 }
 float4 PSA(VS_OUTPUT input) : SV_TARGET
 {
-    return ShadePixel(input, samAnisotropic);
+    return gDiffuseMap.Sample(samAnisotropic, input.UV);
 }
 
 //--------------------------------------------------
@@ -168,7 +146,7 @@ technique11 LinearSamplingTechnique
 technique11 AnisotropicSamplingTechnique
 {
     pass P0
-    {        
+    {
         SetRasterizerState      (gRasterizerState);
         SetDepthStencilState    (gDepthStencilState, 0);
         SetBlendState           (gBlendState, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xFFFFFFFF);

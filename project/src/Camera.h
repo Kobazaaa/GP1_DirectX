@@ -33,8 +33,8 @@ namespace dae
 		float totalPitch{};
 		float totalYaw{};
 
-		const float MOVEMENT_SPEED = 20.f;
-		const float ROTATION_SPEED = 200.f;
+		const float MOVEMENT_SPEED = 150.f;
+		const float ROTATION_SPEED = 300.f;
 
 		Matrix viewMatrix{};
 		Matrix invViewMatrix{};
@@ -77,7 +77,7 @@ namespace dae
 
 		Matrix GetViewMatrix()
 		{
-			CalculateViewMatrix();
+			//CalculateViewMatrix();
 			return viewMatrix;
 		}
 		Matrix GetProjectionMatrix()
@@ -90,7 +90,7 @@ namespace dae
 		{
 			const float deltaTime = pTimer->GetElapsed();
 			const float displacement = MOVEMENT_SPEED * deltaTime;
-			const float pitchLockAngle = 80 * TO_RADIANS;
+			constexpr float pitchLockAngle = 80 * TO_RADIANS;
 
 			//Keyboard Input
 			const uint8_t* pKeyboardState = SDL_GetKeyboardState(nullptr);
@@ -120,22 +120,22 @@ namespace dae
 			const bool RMB = mouseState & SDL_BUTTON(SDL_BUTTON_RIGHT);
 			if (!LMB and RMB)
 			{
-				totalPitch  -= mouseY * ROTATION_SPEED * deltaTime * TO_RADIANS;
+				totalPitch  -= SignOf(mouseY) * ROTATION_SPEED * deltaTime * TO_RADIANS;
 				totalPitch   = std::clamp(totalPitch, -pitchLockAngle, pitchLockAngle); // locks the up/down camera rotation so you don't overshoot
-				totalYaw	+= mouseX * ROTATION_SPEED * deltaTime * TO_RADIANS;
+				totalYaw	+= SignOf(mouseX) * ROTATION_SPEED * deltaTime * TO_RADIANS;
 			}
 			else if (LMB and !RMB)
 			{
 				origin		-= SignOf(mouseY) * forward * displacement;
-				totalYaw	+= mouseX * ROTATION_SPEED * deltaTime * TO_RADIANS;
+				totalYaw	+= SignOf(mouseX) * ROTATION_SPEED * deltaTime * TO_RADIANS;
 			}
 			else if (LMB and RMB)
 			{
-				origin -= SignOf(mouseY) * up * displacement;
+				origin		-= SignOf(mouseY) * up * displacement;
 			}
 
 			// Apply the rotations
-			Matrix totalRotation = Matrix::CreateRotation(Vector3(totalPitch, totalYaw, 0));
+			const Matrix totalRotation = Matrix::CreateRotation(Vector3(totalPitch, totalYaw, 0));
 			forward = totalRotation.TransformVector(Vector3::UnitZ);
 			Camera::forward.Normalize();
 

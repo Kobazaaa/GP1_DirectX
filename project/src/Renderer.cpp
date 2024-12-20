@@ -30,23 +30,40 @@ namespace dae {
 		//	{ { -0.5f, -0.5f, 0.5f } , { 0.f, 0.f, 1.f } }
 		//};
 		//std::vector<uint32_t> indices{ 0, 1, 2 };
-		std::vector<Vertex> vertices
-		{
-				{ { -1.f,  1.f, 0.f }, { 1.f, 0.f, 0.f }, { 0.f, 0.f } },
-				{ {  1.f,  1.f, 0.f }, { 0.f, 1.f, 0.f }, { 1.f, 0.f } },
-				{ {  1.f, -1.f, 0.f }, { 0.f, 0.f, 1.f }, { 1.f, 1.f } },
-				{ { -1.f, -1.f, 0.f }, { 1.f, 1.f, 1.f }, { 0.f, 1.f } }
-		};
-		std::vector<uint32_t> indices{ 0, 1, 2, 0, 2, 3};
 
-		Utils::ParseOBJ("resources/vehicle.obj", vertices, indices);
-		m_pMesh = new Mesh(m_pDevice, vertices, indices, L"resources/PosCol3D.fx", "resources/vehicle_diffuse.png");
-		m_Camera.Initialize(45.f, { 0.f, 0.f , -10.f }, m_Width / float(m_Height));
+		m_pVehicleEffect = new FullShadeEffect(m_pDevice, L"resources/PosCol3D.fx");
+		Texture* texture = Texture::LoadFromFile("resources/vehicle_diffuse.png", m_pDevice);
+		m_pVehicleEffect->SetDiffuseMap(texture);
+		delete texture;
+		texture = Texture::LoadFromFile("resources/vehicle_specular.png", m_pDevice);
+		m_pVehicleEffect->SetNormalMap(texture);
+		delete texture;
+		texture = Texture::LoadFromFile("resources/vehicle_specular.png", m_pDevice);
+		m_pVehicleEffect->SetSpecularMap(texture);
+		delete texture;
+		texture = Texture::LoadFromFile("resources/vehicle_gloss.png", m_pDevice);
+		m_pVehicleEffect->SetGlossinessMap(texture);
+		delete texture;
+
+		m_pVehicleMesh = new Mesh(m_pDevice, "resources/vehicle.obj", m_pVehicleEffect);
+
+
+		m_pFireEffect = new FlatShadeEffect(m_pDevice, L"resources/Fire.fx");
+		texture = Texture::LoadFromFile("resources/fireFX_diffuse.png", m_pDevice);
+		m_pFireEffect->SetDiffuseMap(texture);
+		delete texture;
+
+		m_pFireMesh = new Mesh(m_pDevice, "resources/fireFX.obj", m_pFireEffect);
+
+		m_Camera.Initialize(45.f, { 0.f, 0.f , -10.f }, m_Width / static_cast<float>(m_Height));
 	}
 
 	Renderer::~Renderer()
 	{
-		delete m_pMesh;
+		delete m_pFireEffect;
+		delete m_pFireMesh;
+		delete m_pVehicleEffect;
+		delete m_pVehicleMesh;
 
 		if (m_pRenderTargetView)		m_pRenderTargetView->Release();
 		if (m_pRenderTargetBuffer)		m_pRenderTargetBuffer->Release();
@@ -65,10 +82,17 @@ namespace dae {
 	void Renderer::Update(const Timer* pTimer)
 	{
 		m_Camera.Update(pTimer);
-		m_pMesh->UpdateWorldViewProjectionMatrix(m_Camera.GetViewMatrix() * m_Camera.GetProjectionMatrix());
-		Matrix m = m_Camera.GetViewMatrix() * m_Camera.GetProjectionMatrix();
+		m_pVehicleEffect->SetWorldMatrix(m_pVehicleMesh->GetWorldMatrix());
 
-		m_pMesh->UpdateWorldMatrix(Matrix::CreateRotationY(pTimer->GetTotal() * PI_DIV_2));
+		m_pVehicleEffect->SetCameraPosition(m_Camera.origin);
+
+		//m_pVehicleMesh->SetWorldMatrix(Matrix::CreateRotationY(pTimer->GetTotal() * PI_DIV_2));
+		//m_pFireMesh->SetWorldMatrix(Matrix::CreateRotationY(pTimer->GetTotal() * PI_DIV_2));
+
+		Matrix wvpm = m_pVehicleMesh->GetWorldMatrix() * m_Camera.GetViewMatrix() * m_Camera.GetProjectionMatrix();
+		m_pVehicleEffect->SetWorldViewProjectionMatrix(wvpm);
+		wvpm = m_pFireMesh->GetWorldMatrix() * m_Camera.GetViewMatrix() * m_Camera.GetProjectionMatrix();
+		m_pFireEffect->SetWorldViewProjectionMatrix(wvpm);
 	}
 
 
@@ -83,7 +107,8 @@ namespace dae {
 		m_pDeviceContext->ClearDepthStencilView(m_pDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
 
 		// 2. SET PIPELINE + INVOKE DRAW CALLS (= RENDER)
-		m_pMesh->Render(m_pDeviceContext);
+		m_pVehicleMesh->Render(m_pDeviceContext);
+		m_pFireMesh->Render(m_pDeviceContext);
 
 		// 3. PRESENT BACKBUFFER (SWAP)
 		m_pSwapChain->Present(0, 0);
@@ -91,7 +116,8 @@ namespace dae {
 
 	void Renderer::ToggleTechniqueIndex()
 	{
-		m_pMesh->ToggleTechniqueIndex();
+		m_pVehicleMesh->ToggleTechniqueIndex();
+		m_pFireMesh->ToggleTechniqueIndex();
 	}
 
 	HRESULT Renderer::InitializeDirectX()

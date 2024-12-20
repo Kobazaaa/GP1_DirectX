@@ -42,7 +42,13 @@ namespace dae
 		ID3D11Resource*			m_pRenderTargetBuffer	{ nullptr };
 		ID3D11RenderTargetView* m_pRenderTargetView		{ nullptr };
 
-		Mesh* m_pMesh{ nullptr };
+		FullShadeEffect* m_pVehicleEffect{ nullptr };
+		Mesh* m_pVehicleMesh{ nullptr };
+
+		FlatShadeEffect* m_pFireEffect{ nullptr };
+		Mesh* m_pFireMesh{ nullptr };
+
+
 		Camera m_Camera{};
 	};
 }
