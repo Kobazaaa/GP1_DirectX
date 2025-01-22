@@ -141,6 +141,31 @@ namespace dae {
 		if (FAILED(result))
 			return result;
 
+		////////////////////////////
+		//IDXGIAdapter* adapter = nullptr;
+		//IDXGIAdapter* selectedAdapter = nullptr;
+		//for (UINT i = 0; pDxgiFactory->EnumAdapters(i, &adapter) !=
+		//	DXGI_ERROR_NOT_FOUND; ++i)
+		//{
+		//	DXGI_ADAPTER_DESC desc;
+		//	adapter->GetDesc(&desc);
+		//	std::wcout << L"Adapter " << i << L": " << desc.Description << L"\n";
+		//	if (desc.VendorId != 0x8086)
+		//	{
+		//		selectedAdapter = adapter;
+		//		break;
+		//	}
+		//}
+		//if (selectedAdapter == nullptr)
+		//{
+		//	//TODO error handling when no adapter found!!
+		//}
+		//// Change by adding selected adapter and pick type unknown
+		//result = D3D11CreateDevice(selectedAdapter, D3D_DRIVER_TYPE_UNKNOWN,
+		//	0, createDeviceFlags, &featureLevel, 1,
+		//	D3D11_SDK_VERSION, &m_pDevice, nullptr, &m_pDeviceContext);
+		////////////////////////////
+
 		// 2. Create Swapchain
 		//=====
 		DXGI_SWAP_CHAIN_DESC swapChainDesc{};

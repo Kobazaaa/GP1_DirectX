@@ -20,6 +20,9 @@ struct Vertex
 class Mesh final
 {
 public:
+	//--------------------------------------------------
+	//    Constructors and Destructors
+	//--------------------------------------------------
 	Mesh(ID3D11Device* pDevice, const std::string& objFilePath, BaseEffect* pEffect);
 	~Mesh();
 	
@@ -28,8 +31,14 @@ public:
 	Mesh& operator=(const Mesh&) = delete;
 	Mesh& operator=(Mesh&&) noexcept = delete;
 
+	//--------------------------------------------------
+	//    Rendering
+	//--------------------------------------------------
 	void Render(ID3D11DeviceContext* pDeviceContext);
 
+	//--------------------------------------------------
+	//    Accessors and Mutators
+	//--------------------------------------------------
 	void SetWorldMatrix(const Matrix& newWorldMatrix);
 	Matrix GetWorldMatrix() const;
 
@@ -37,7 +46,6 @@ public:
 private:
 	std::vector<Vertex> m_vVertices{};
 	std::vector<uint32_t> m_vIndices{};
-
 
 	BaseEffect* m_pEffect{};
 
